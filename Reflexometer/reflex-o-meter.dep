@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <fileVersion>5</fileVersion>
+    <fileChecksum>786420098</fileChecksum>
+    <configuration>
+        <name>Debug</name>
+        <outputs>
+            <file>$TOOLKIT_DIR$\config\linker\lnk430f149.xcl</file>
+            <file>$TOOLKIT_DIR$\inc\msp430.h</file>
+            <file>$PROJ_DIR$\Debug\Exe\reflex-o-meter.d43</file>
+            <file>$PROJ_DIR$\reflex-o-meter.s43</file>
+            <file>$TOOLKIT_DIR$\inc\msp430f149.h</file>
+            <file>$PROJ_DIR$\Debug\List\reflex-o-meter.map</file>
+            <file>$PROJ_DIR$\Debug\Obj\reflex-o-meter.r43</file>
+        </outputs>
+        <file>
+            <name>$PROJ_DIR$\Debug\Exe\reflex-o-meter.d43</name>
+            <outputs>
+                <tool>
+                    <name>XLINK</name>
+                    <file> 5</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>XLINK</name>
+                    <file> 0 6</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\reflex-o-meter.s43</name>
+            <outputs>
+                <tool>
+                    <name>A430</name>
+                    <file> 6</file>
+                </tool>
+            </outputs>
+            <inputs>
+                <tool>
+                    <name>A430</name>
+                    <file> 1 4</file>
+                </tool>
+            </inputs>
+        </file>
+        <file>
+            <name>[ROOT_NODE]</name>
+            <outputs>
+                <tool>
+                    <name>XLINK</name>
+                    <file> 2 5</file>
+                </tool>
+            </outputs>
+        </file>
+    </configuration>
+    <configuration>
+        <name>Release</name>
+        <outputs />
+        <forcedrebuild>
+            <name>[MULTI_TOOL]</name>
+            <tool>XLINK</tool>
+        </forcedrebuild>
+    </configuration>
+</project>

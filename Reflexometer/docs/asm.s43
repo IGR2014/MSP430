@@ -1,0 +1,134 @@
+#include "msp430.h"                     ; #define controlled include file
+
+        NAME    main                    ; module name
+
+        PUBLIC  main                    ; make the main label vissible
+                                        ; outside this module
+        
+        ORG     0FFECh
+        DC16    TIMER_A0_Interrupt
+        
+        ORG     0FFEAh
+        DC16    TIMER_A1_Interrupt
+        
+        ORG     0FFE8h
+        DC16    BUTTON_Interrupt
+        
+        ORG     0FFFEh
+        DC16    init                    ; set reset vector to 'init' label
+
+        RSEG    CSTACK                  ; pre-declaration of segment
+        RSEG    CODE                    ; place program in 'CODE' segment
+
+init:   MOV     #SFE(CSTACK), SP        ; set up stack
+        BIS.B   #0xFF ,&P2DIR 
+        MOV.B   #0, P2OUT
+        MOV.B   #0, R4
+        MOV.B   #0, R5
+        MOV.B   #100, R6
+        MOV.B   #0, R7
+        MOV.B   #0, R8
+        MOV.B   #0, R9
+        MOV.B   #0, R10
+
+main:   NOP                             ; main program
+        MOV.W   #WDTPW+WDTHOLD,&WDTCTL  ; Stop watchdog timer
+        
+        mov.w   #1000,&TACCR0            ; Period for up mode
+        ;mov.w   #CCIE,&TACCTL0            ; Enable interrupts on Compare 0
+        mov.w   #CCIE,&TACCTL1            ; Enable interrupts on Compare 1
+
+        ; Set up Timer A. Up mode, divide clock by 8, clock from SMCLK, clear TAR
+        mov.w   #MC_1 |ID_3|TASSEL_2|TACLR,&TACTL
+        MOV.B   #0FFh, P2OUT
+        
+        MOV.B   #8, P1IE                ; zezwolenie na przerwanie z pinu P1.0 
+        MOV.B   #8, P1IES               ; ustaw zbocze opadajace wyzwalajace przerwanie na P1.0 
+        BIC.B   #8, P1IFG               ; Skasuj flage przerwania od P1.0
+        
+        
+        bis.w   #GIE,SR                   ; Enable interrupts (just TACCR0)
+
+        JMP $                           ; jump to current location '$'
+                                        ; (endless loop)
+
+
+TIMER_A0_Interrupt:
+        INC.B   R6
+        CMP.B   #600, R6
+        jnz     both_a0
+        MOV.B   #100, R6
+        
+both_a0:
+        bic.w   #CCIFG, &TACCTL0
+        RETI
+
+
+
+
+
+
+TIMER_A1_Interrupt:
+        CMP.B   #0, R9   ;Check if in idle
+        jz      idle
+
+        CMP.B   #1, R7   ;Check wait mode
+        jz wait2
+
+wait1:
+        INC.B   R8
+        CMP.B   R10, R8
+        jnz both_modes
+        MOV.B   #0, R8
+        MOV.B   #0, P2OUT
+        MOV.B   #1, R7   ;Turn on second wait mode
+        
+
+wait2:
+        CMP.B   #99h, R4
+        jlo increment_counter
+        
+        mov.b   R4, P2OUT
+        mov.b   #0, R9  ;Turn on idle
+        
+        jmp both_modes
+        
+increment_counter:
+        CLRC
+        DADD.B  #1, R4
+       
+both_modes:
+
+idle:
+
+        bic.w #CCIFG, &TACCTL1
+        RETI
+
+
+
+
+
+BUTTON_Interrupt:
+        MOV.B   P4IN, R5
+        
+        BIT.B   #2, R5 ;INIT
+        jnz button_both1
+        MOV.B   #0FFh, P2OUT
+        mov.b   #1, R9     ;Turn off idle
+        mov.b   #0, R4     ;Clear 0-99 timer
+        mov.b   #0, R7     ;Turn on first wait mode
+        mov.b   R6, R10    ;Save random number
+button_both1:      
+        BIT.B   #1, R5 ;STOP
+        jnz button_both2
+        CMP.B   #0, R7
+        jz      button_both2
+        mov.b   R4, P2OUT
+        mov.b   #0, R9     ;Turn on idle
+button_both2: 
+        
+        BIC.B   #8, P1IFG
+        RETI
+
+        
+        END
